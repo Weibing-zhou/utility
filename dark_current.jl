@@ -1,7 +1,7 @@
 # pwd() 命令可查看当前工作路径
 # cd(dir::String) 更换路径
 
-using DataFrames, AlgebraOfGraphics, CairoMakie, Glob, Colors, LaTeXStrings, Dierckx
+using DataFrames, AlgebraOfGraphics, CairoMakie, Glob, Colors, LaTeXStrings, Dierckx, ColorSchemes
 
 using CSV
 
@@ -47,8 +47,9 @@ ra = data(df) * mapping(" V1", "c", color="d",) * visual(Lines)
 jv = data(df) * mapping(" V1", " Jdensity", color=:"d",) * visual(Lines)
 
 
+fig = Figure(; size=(1400,500))
 
-fig1 = draw(jv,
+subfig1 = draw!(fig[1, 1], jv;
     axis=(;
         title=string(folder_id)*" | 77 K" ,
         titlealign = :center,
@@ -59,18 +60,11 @@ fig1 = draw(jv,
         ylabel=L"Dark current density $(A/cm^2)$",
         # aspect =  10/10,
         xticks = -0.8:0.2:0.5,
-        limits=((-0.8,0.5),(10^(-8), 10^4)),
+        limits=((-0.8,0.5),(nothing, nothing)),
     ),
-    legend=(position=:right, titleposition=:top, framevisible=false, padding=0, patchsize=(20,10))
 )
 
-save(string(folder_id)*"_JV.png", fig1; px_per_unit=10.0)
-
-fig1
-
-
-
-fig2 = draw(ra,
+subfig2 = draw!(fig[1, 3], ra;
     axis=(;
         title=string(folder_id)*" | 77 K" ,
         titlealign = :center,
@@ -80,16 +74,76 @@ fig2 = draw(ra,
         xlabel=L"Gate voltage $(V)$",
         ylabel=L"R*A $(\Omega\cdot cm^2)$",
         # aspect =  10/10,
-        # xticks = -0.8:0.2:0.5,
-        # limits=((-0.8,0.5),(10^(-8), 10^4)),
+        xticks = -0.8:0.2:0.5,
+        limits=((-0.8,0.5),(nothing, nothing)),
     ),
-    legend=(position=:right, titleposition=:top, framevisible=false, padding=0, patchsize=(20,10))
+    # palettes=(; color=ColorSchemes.Set1_9.colors)
 )
 
-save(string(folder_id)*"_RA.png", fig2; px_per_unit=10.0)
 
-fig2
 
+legend!(
+    fig[1,2],
+    subfig1;
+    orientation=:vertical,
+    tellheight=false,
+    framevisible=false, 
+    padding=0, 
+    patchsize=(20,10)
+)
+
+
+legend!(
+    fig[1,4],
+    subfig2;
+    orientation=:vertical,
+    tellheight=false,
+    framevisible=false, 
+    padding=0, 
+    patchsize=(20,10)
+)
+
+# draw(jv,
+# axis=(;
+#     title=string(folder_id)*" | 77 K" ,
+#     titlealign = :center,
+#     # titlefont = "DejaVu Sans Mono",
+#     # titlegap = -300,
+#     yscale=log10,
+#     xlabel=L"Gate voltage $(V)$",
+#     ylabel=L"Dark current density $(A/cm^2)$",
+#     # aspect =  10/10,
+#     xticks = -0.8:0.2:0.5,
+#     limits=((-0.8,0.5),(10^(-8), 10^4)),
+# ),
+# legend=(position=:right, titleposition=:top, framevisible=false, padding=0, patchsize=(20,10)),
+# )
+
+
+# save(string(folder_id)*"_JV.png", fig; px_per_unit=10.0)
+
+
+
+# draw(ra,
+# axis=(;
+#     title=string(folder_id)*" | 77 K" ,
+#     titlealign = :center,
+#     # titlefont = "DejaVu Sans Mono",
+#     # titlegap = -300,
+#     yscale=log10,
+#     xlabel=L"Gate voltage $(V)$",
+#     ylabel=L"R*A $(\Omega\cdot cm^2)$",
+#     # aspect =  10/10,
+#     # xticks = -0.8:0.2:0.5,
+#     # limits=((-0.8,0.5),(10^(-8), 10^4)),
+# ),
+# legend=(position=:right, titleposition=:top, framevisible=false, padding=0, patchsize=(20,10)),
+# )
+
+save(string(folder_id)*".png", fig)
+
+
+fig
 
 
 
