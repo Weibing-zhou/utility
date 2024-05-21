@@ -1,11 +1,11 @@
 # pwd() 命令可查看当前工作路径
 # cd(dir::String) 更换路径
 
-using DataFrames, AlgebraOfGraphics, CairoMakie, Glob, Colors, LaTeXStrings, Dierckx, ColorSchemes
+using DataFrames, AlgebraOfGraphics, CairoMakie, Glob, LaTeXStrings, Dierckx, ColorSchemes
 
 using CSV
 
-folder = raw"I:\julia\20240516 501 532 531\531" 
+folder = raw"D:\plot\20240516 501 532 531\531" 
 files = glob("*.csv", folder) 
 
 folder_id = basename(folder)
@@ -25,16 +25,20 @@ for i in files
     y = df_temp." Jdensity"
     spl = Spline1D(x, y; k=5)
     D1f = derivative(spl, x; nu=1)
-    insertcols!(df_temp, :c => 1 ./ abs.(D1f))
-    insertcols!(df_temp, :d =>curve_name)
+    insertcols!(df_temp, :"ra" => 1 ./ abs.(D1f))
+    insertcols!(df_temp, :"source" =>curve_name)
     append!(df, df_temp)
 
 end
 
 
+
+rename!(df,:" V1" => :"voltage", :" Jdensity" => :"jdensity")
+
+CSV.write(string(folder_id)*"_dark.csv", df)
+
+
 # println(df)
-
-
 # CairoMakie.activate!()
 # # A vector can be defined as the sequence of data with the same datatype.
 # # We can concatenate any number of objects together, as long as they are the same type
@@ -42,12 +46,12 @@ end
 
 # Plot Data
 
-ra = data(df) * mapping(" V1", "c", color="d",) * visual(Lines)
+ra = data(df) * mapping("voltage", "ra", color="source",) * visual(Lines)
 
-jv = data(df) * mapping(" V1", " Jdensity", color=:"d",) * visual(Lines)
+jv = data(df) * mapping("voltage", "jdensity", color=:"source",) * visual(Lines)
 
 
-fig = Figure(; size=(1400,500))
+fig = Figure(; size=(1400,600))
 
 subfig1 = draw!(fig[1, 1], jv;
     axis=(;
@@ -103,51 +107,12 @@ legend!(
     patchsize=(20,10)
 )
 
-# draw(jv,
-# axis=(;
-#     title=string(folder_id)*" | 77 K" ,
-#     titlealign = :center,
-#     # titlefont = "DejaVu Sans Mono",
-#     # titlegap = -300,
-#     yscale=log10,
-#     xlabel=L"Gate voltage $(V)$",
-#     ylabel=L"Dark current density $(A/cm^2)$",
-#     # aspect =  10/10,
-#     xticks = -0.8:0.2:0.5,
-#     limits=((-0.8,0.5),(10^(-8), 10^4)),
-# ),
-# legend=(position=:right, titleposition=:top, framevisible=false, padding=0, patchsize=(20,10)),
-# )
-
-
-# save(string(folder_id)*"_JV.png", fig; px_per_unit=10.0)
-
-
-
-# draw(ra,
-# axis=(;
-#     title=string(folder_id)*" | 77 K" ,
-#     titlealign = :center,
-#     # titlefont = "DejaVu Sans Mono",
-#     # titlegap = -300,
-#     yscale=log10,
-#     xlabel=L"Gate voltage $(V)$",
-#     ylabel=L"R*A $(\Omega\cdot cm^2)$",
-#     # aspect =  10/10,
-#     # xticks = -0.8:0.2:0.5,
-#     # limits=((-0.8,0.5),(10^(-8), 10^4)),
-# ),
-# legend=(position=:right, titleposition=:top, framevisible=false, padding=0, patchsize=(20,10)),
-# )
-
-save(string(folder_id)*".png", fig)
+save(string(folder_id)*"_dark.png", fig)
 
 
 fig
 
 
-
-
-#  核心操作点： 如何绘制 multi curve，已经解决，先 Vcat csv 文件，再AoG 结合 Makie 绘图
-#  如何创建类似excel的数据库
-# axis 选项中 xlabel=L"r [r_{\mathrm{Sch}}]"，可输入数学格式
+# 待解决问题：
+# 1. 找出maxium and minium
+# 2. 修改坐标title字体，不适配
