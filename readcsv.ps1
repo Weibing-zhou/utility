@@ -44,3 +44,5 @@ results = foreach($i in $path)
 # $output | Sort-Object Files -Descending | Export-Csv -NoTypeInformation -Encoding UTF8 -Path $des
 
 # Export-CSV -Path $exportto -NoTypeInformation -Delimiter ":" -Encoding UTF8
+
+# 数据结构不标准，先用Get-Content导入数据加工处理，不要使用Import_csv直接导入
